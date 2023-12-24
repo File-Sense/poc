@@ -97,13 +97,13 @@ def createAndOperation(path: str):
     text_collection.upsert(
         ids=[str(hash(img_path)) for img_path in img_path_list],
         embeddings=caption_emb_list,
-        metadatas=metadatalist,
+        metadatas=metadatalist,  # type: ignore
         documents=caption_list,
     )
     image_collection.upsert(
         ids=[str(hash(img_path)) for img_path in img_path_list],
         embeddings=image_emb_list,
-        metadatas=metadatalist,
+        metadatas=metadatalist,  # type: ignore
         documents=caption_list,
     )
     db = SessionLocal()
@@ -113,25 +113,6 @@ def createAndOperation(path: str):
     db.close()
     update_stat()
 
-
-if "name" not in st.session_state:
-    st.session_state.name = ["Roadmap", "Extras", "Issues"]
-
-if "url" not in st.session_state:
-    st.session_state.url = [
-        "https://roadmap.streamlit.app",
-        "https://extras.streamlit.app",
-        "https://issues.streamlit.app",
-    ]
-
-
-if "stars" not in st.session_state:
-    st.session_state.stars = [random.randint(0, 1000) for _ in range(3)]
-
-if "views_history" not in st.session_state:
-    st.session_state.views_history = [
-        [random.randint(0, 5000) for _ in range(30)] for _ in range(3)
-    ]
 
 if "img_paths" not in st.session_state:
     st.session_state.img_paths = []
@@ -144,7 +125,7 @@ st.title("File Sense (PoC) 🔍🖼️", anchor="center")
 
 clicked = st.button("Select Folder for Indexing")
 if clicked:
-    dirname = filedialog.askdirectory(master=root, title="Select a folder to Index")
+    dirname = filedialog.askdirectory(master=root, title="Select a folder to Index")  # type: ignore
     with st.spinner("Indexing in Progress"):
         createAndOperation(dirname)
     st.success("Indexing Completed")
@@ -162,7 +143,7 @@ with textToImageTab:
             collection_dict = get_collection_dict(st.session_state.collections["text"])
             select_collection = ""
             if len(collection_dict) != 0:
-                select_collection = row1[0].selectbox(
+                select_collection = row1[0].selectbox(  # type: ignore
                     "Select Collection", tuple(list(collection_dict.keys()))
                 )
                 select_collection = collection_dict[select_collection]
@@ -184,12 +165,12 @@ with textToImageTab:
                     text_emb = ai_engine.generate_text_embedding([text])
                     results = text_collection.query(
                         query_embeddings=text_emb,
-                        n_results=no_of_results,
+                        n_results=no_of_results,  # type: ignore
                     )
                     print("RESULTS", results)
-                    for idx, result in enumerate(results["metadatas"]):
+                    for idx, result in enumerate(results["metadatas"]):  # type: ignore
                         for value in result:
-                            image_path = path.relpath(value["path"], Path.cwd())
+                            image_path = path.relpath(value["path"], Path.cwd())  # type: ignore
                             st.session_state.img_paths.append(image_path)
         st.button(
             "Clear",
@@ -205,31 +186,15 @@ with textToImageTab:
                     )
                     for idx, img_path in enumerate(st.session_state.img_paths):
                         img_rows[idx].image(img_path)
-                        # if img_rows[idx].button(
-                        #     "Open in File Explorer", key=uuid4().hex
-                        # ):
-                        #     res = subprocess.call(
-                        #         f"""C:\Windows\System32\powershell.exe Start-Process -FilePath C:\Windows\explorer.exe -ArgumentList "/select, {img_path}""",
-                        #         shell=True,
-                        #     )
-                        #     st.write(res)
                         img_rows[idx].write(img_path)
                 else:
                     img_rows = st.columns([1 for _ in range(5)])
                     for idx, img_path in enumerate(st.session_state.img_paths[:5]):
                         img_rows[idx].image(img_path)
-                        # if img_rows[idx].button(
-                        #     "Open in File Explorer", key=uuid4().hex
-                        # ):
-                        #     open_file_explorer(img_path)
                         img_rows[idx].write(img_path)
                     img_rows = st.columns([1 for _ in range(5)])
                     for idx, img_path in enumerate(st.session_state.img_paths[5:]):
                         img_rows[idx].image(img_path)
-                        # if img_rows[idx].button(
-                        #     "Open in File Explorer", key=uuid4().hex
-                        # ):
-                        #     open_file_explorer(img_path)
                         img_rows[idx].write(img_path)
 with imageToImageTab:
     with st.container():
@@ -239,7 +204,7 @@ with imageToImageTab:
             collection_dict = get_collection_dict(st.session_state.collections["image"])
             select_collection = ""
             if len(collection_dict) != 0:
-                select_collection = row1[0].selectbox(
+                select_collection = row1[0].selectbox(  # type: ignore
                     "Select Collection", tuple(list(collection_dict.keys()))
                 )
                 select_collection = collection_dict[select_collection]
@@ -261,16 +226,16 @@ with imageToImageTab:
                     print("NO OF RESULTS", no_of_results)
                     image_collection = client.get_collection(select_collection)
                     print("IMAGE COLLECTION", image_collection)
-                    image_emb = ai_engine.generate_image_embedding(upload_image)
+                    image_emb = ai_engine.generate_image_embedding(upload_image)  # type: ignore
                     print("IMAGE EMB", image_emb)
                     results = image_collection.query(
                         query_embeddings=image_emb,
-                        n_results=no_of_results,
+                        n_results=no_of_results,  # type: ignore
                     )
                     print("RESULTS", results)
-                    for idx, result in enumerate(results["metadatas"]):
+                    for idx, result in enumerate(results["metadatas"]):  # type: ignore
                         for value in result:
-                            image_path = path.relpath(value["path"], Path.cwd())
+                            image_path = path.relpath(value["path"], Path.cwd())  # type: ignore
                             st.session_state.img_paths.append(image_path)
         st.button(
             "Clear",
@@ -286,50 +251,13 @@ with imageToImageTab:
                 )
                 for idx, img_path in enumerate(st.session_state.img_paths):
                     img_rows[idx].image(img_path)
-                    # if img_rows[idx].button("Open in File Explorer", key=uuid4().hex):
-                    #     open_file_explorer(img_path)
                     img_rows[idx].caption(img_path)
             else:
                 img_rows = st.columns([1 for _ in range(5)])
                 for idx, img_path in enumerate(st.session_state.img_paths[:5]):
                     img_rows[idx].image(img_path)
-                    # if img_rows[idx].button("Open in File Explorer", key=uuid4().hex):
-                    #     open_file_explorer(img_path)
                     img_rows[idx].caption(img_path)
                 img_rows = st.columns([1 for _ in range(5)])
                 for idx, img_path in enumerate(st.session_state.img_paths[5:]):
                     img_rows[idx].image(img_path)
-                    # if img_rows[idx].button("Open in File Explorer", key=uuid4().hex):
-                    #     open_file_explorer(img_path)
                     img_rows[idx].caption(img_path)
-# df = pd.DataFrame(
-#     {
-#         "name": st.session_state.name,
-#         "url": st.session_state.url,
-#         "stars": st.session_state.stars,
-#         "views_history": st.session_state.views_history,
-#     }
-# )
-# st.dataframe(
-#     df,
-#     column_config={
-#         "name": "App name",
-#         "stars": st.column_config.NumberColumn(
-#             "Github Stars",
-#             help="Number of stars on GitHub",
-#             format="%d ⭐",
-#         ),
-#         "url": st.column_config.LinkColumn("App URL"),
-#         "views_history": st.column_config.LineChartColumn(
-#             "Views (past 30 days)", y_min=0, y_max=5000
-#         ),
-#     },
-#     hide_index=True,
-# )
-
-# if st.button("Add New Values"):
-#     st.session_state.name.append("Test")
-#     st.session_state.url.append("https://test.streamlit.app")
-#     st.session_state.stars.append(random.randint(0, 1000))
-#     st.session_state.views_history.append([random.randint(0, 5000) for _ in range(30)])
-#     st.rerun()

@@ -1,9 +1,9 @@
 from os import path
 from torch.cuda import is_available
-import torchvision.transforms as T
+import torchvision.transforms as T  # type: ignore
 from PIL import Image
 from torch import no_grad, sum, clamp
-from transformers import (
+from transformers import (  # type: ignore
     BlipProcessor,
     BlipForConditionalGeneration,
     AutoModel,
@@ -62,13 +62,13 @@ class AIEngine(object):
         )
         with no_grad():
             model_output = self.text_model(**encoded_input.to(self.device))
-        sentence_embedding = self.mean_pooling(
+        sentence_embedding = self.__mean_pooling(
             model_output, encoded_input["attention_mask"].to(self.device)
         )
         sentence_embedding = F.normalize(sentence_embedding, p=2, dim=1)
         return sentence_embedding.tolist()
 
-    def generate_image_embedding(self, image_path: str, image: Image = None):
+    def generate_image_embedding(self, image_path: str, image: Image = None):  # type: ignore
         if image is None:
             raw_image = Image.open(image_path).convert("RGB")
         else:
@@ -95,7 +95,7 @@ class AIEngine(object):
             )
             return image_embedding[0].tolist()
 
-    def mean_pooling(self, model_output, attention_mask):
+    def __mean_pooling(self, model_output, attention_mask):
         token_embeddings = model_output[0]
         input_mask_expanded = (
             attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
